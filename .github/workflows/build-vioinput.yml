@@ -24,7 +24,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build vioinput
-        run: msbuild vioinput/vioinput.sln -p:Configuration=Release -p:Platform=x64 -m -v:m
+        run: msbuild vioinput/vioinput.sln -p:Configuration="Win11 Release" -p:Platform=x64 -m -v:m
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
