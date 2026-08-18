@@ -31,8 +31,8 @@ jobs:
         with:
           name: vioinput-mt-x64
           path: |
-            vioinput/**/x64/Release/*.sys
-            vioinput/**/x64/Release/*.inf
-            vioinput/**/x64/Release/*.cat
-            vioinput/**/x64/Release/*.dll
+            vioinput/**/x64/Win11Release/*.sys
+            vioinput/**/x64/Win11Release/*.inf
+            vioinput/**/x64/Win11Release/*.cat
+            vioinput/**/x64/Win11Release/*.dll
           if-no-files-found: error
