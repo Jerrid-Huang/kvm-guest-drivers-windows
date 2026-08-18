@@ -177,6 +177,9 @@ static NTSTATUS HIDTabletEventToCollect(PINPUT_CLASS_COMMON pClass, PVIRTIO_INPU
                                     sizeof(INPUT_CLASS_TABLET_SLOT) * pTabletDesc->uMaxContacts] = uContacts;
                             pClass->bDirty = TRUE;
                         }
+                        DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL,
+                                   "VIOINPUT-DBG: SYN_REPORT MT contacts=%u dirty=%d\n",
+                                   uContacts, pClass->bDirty);
                     }
                     break;
                 default:
@@ -202,6 +205,16 @@ static NTSTATUS HIDTabletEventToReport(PINPUT_CLASS_COMMON pClass, PVIRTIO_INPUT
     ULONG uNumContacts;
 
     TraceEvents(TRACE_LEVEL_VERBOSE, DBG_READ, "--> %s\n", __FUNCTION__);
+
+    {
+        static ULONG s_dbgEvtCount = 0;
+        if (s_dbgEvtCount++ < 200 || (s_dbgEvtCount % 5000) == 0)
+        {
+            DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL,
+                       "VIOINPUT-DBG: evt type=%u code=%u value=%d (n=%lu)\n",
+                       pEvent->type, pEvent->code, pEvent->value, s_dbgEvtCount);
+        }
+    }
 
     pReport[HID_REPORT_ID_OFFSET] = pClass->uReportID;
     switch (pEvent->type)
@@ -345,6 +358,9 @@ static NTSTATUS HIDTabletEventToReport(PINPUT_CLASS_COMMON pClass, PVIRTIO_INPUT
                     break;
             }
 
+            DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL,
+                       "VIOINPUT-DBG: EV_KEY code=%u value=%d bits=%u bMT=%d\n",
+                       pEvent->code, pEvent->value, uBits, pTabletDesc->bMT);
             // MT will set bDirty before reporting at EV_SYN so drop all bits here.
             if (pTabletDesc->bMT)
             {
@@ -863,6 +879,11 @@ HIDTabletProbe(PINPUT_DEVICE pContext,
 
     HIDAppend1(pHidDesc, HID_TAG_END_COLLECTION); // HID_COLLECTION_APPLICATION
 
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL,
+               "VIOINPUT-DBG: HIDTabletProbe done bMT=%d bIdentMT=%d maxContacts=%lu reportID=%u cbSize=%lu\n",
+               pTabletDesc->bMT, pTabletDesc->bIdentifiableMT,
+               pTabletDesc->uMaxContacts, pTabletDesc->Common.uReportID,
+               (ULONG)pTabletDesc->Common.cbHidReportSize);
     TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Created HID tablet report descriptor\n");
 
     // calculate the tablet HID report size
