@@ -58,6 +58,15 @@ typedef struct _tagInputClassTabletFeatureMaxContact
     UCHAR uReportID;
     UCHAR uMaxContacts;
 } INPUT_CLASS_TABLET_FEATURE_MAX_CONTACT, *PINPUT_CLASS_TABLET_FEATURE_MAX_CONTACT;
+
+/* PTP Configuration feature report (Report ID REPORTID_FEATURE_TABLET_CONFIG).
+   Device Mode: 0 = disabled, 1 = auto, 2 = forced enabled.
+   Windows Precision Touchpad driver queries this; must return enabled. */
+typedef struct _tagInputClassTabletFeatureConfig
+{
+    UCHAR uReportID;
+    UCHAR uDeviceMode;
+} INPUT_CLASS_TABLET_FEATURE_CONFIG, *PINPUT_CLASS_TABLET_FEATURE_CONFIG;
 #pragma pack(pop)
 
 typedef struct _tagInputClassTabletTrackingID
@@ -116,6 +125,19 @@ static NTSTATUS HIDTabletGetFeature(PINPUT_CLASS_COMMON pClass, PHID_XFER_PACKET
                 PINPUT_CLASS_TABLET_FEATURE_MAX_CONTACT pFtrReport = (PINPUT_CLASS_TABLET_FEATURE_MAX_CONTACT)pFeaturePkt->reportBuffer;
 
                 pFtrReport->uMaxContacts = (UCHAR)pTabletDesc->uMaxContacts;
+            }
+            else
+            {
+                status = STATUS_BUFFER_TOO_SMALL;
+            }
+            break;
+        case REPORTID_FEATURE_TABLET_CONFIG:
+            if (pFeaturePkt->reportBufferLen >= sizeof(INPUT_CLASS_TABLET_FEATURE_CONFIG))
+            {
+                PINPUT_CLASS_TABLET_FEATURE_CONFIG pFtrReport = (PINPUT_CLASS_TABLET_FEATURE_CONFIG)pFeaturePkt->reportBuffer;
+
+                /* forced enabled: 2 */
+                pFtrReport->uDeviceMode = 2;
             }
             else
             {
@@ -860,6 +882,17 @@ HIDTabletProbe(PINPUT_DEVICE pContext,
     HIDAppend2(pHidDesc, HID_TAG_REPORT_ID, REPORTID_FEATURE_TABLET_MAX_COUNT);
     HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_CONTACT_COUNT_MAX);
     HIDAppend2(pHidDesc, HID_TAG_FEATURE, HID_DATA_FLAG_VARIABLE | HID_DATA_FLAG_CONSTANT);
+
+    // PTP Configuration feature report with Device Mode (required by the
+    // Windows Precision Touchpad driver, else the device is treated disabled)
+    HIDAppend2(pHidDesc, HID_TAG_REPORT_ID, REPORTID_FEATURE_TABLET_CONFIG);
+    HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_CONFIGURATION);
+    HIDAppend2(pHidDesc, HID_TAG_LOGICAL_MINIMUM, 0x00);
+    HIDAppend2(pHidDesc, HID_TAG_LOGICAL_MAXIMUM, 0x02);
+    HIDAppend2(pHidDesc, HID_TAG_REPORT_SIZE, 0x08);
+    HIDAppend2(pHidDesc, HID_TAG_REPORT_COUNT, 0x01);
+    HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_DEVICE_MODE);
+    HIDAppend2(pHidDesc, HID_TAG_FEATURE, HID_DATA_FLAG_VARIABLE);
 
     HIDAppend1(pHidDesc, HID_TAG_END_COLLECTION); // HID_COLLECTION_APPLICATION
 

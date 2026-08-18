@@ -100,6 +100,10 @@ typedef struct _tagInputClassCommon
 
 #define MAX_INPUT_CLASS_COUNT             5
 #define REPORTID_FEATURE_TABLET_MAX_COUNT (MAX_INPUT_CLASS_COUNT + 1)
+/* PTP: Windows Precision Touchpad requires a Configuration feature report
+   (Usage 0x0E) with a Device Mode field; without it the PTP driver treats
+   the device as disabled and no input is delivered. */
+#define REPORTID_FEATURE_TABLET_CONFIG (MAX_INPUT_CLASS_COUNT + 2)
 
 typedef struct _tagInputDevice
 {
