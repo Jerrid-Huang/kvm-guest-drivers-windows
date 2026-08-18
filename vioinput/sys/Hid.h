@@ -73,7 +73,9 @@
 
 #define HID_USAGE_DIGITIZER                    0x01
 #define HID_USAGE_DIGITIZER_CONFIGURATION          0x0E
+#ifndef HID_USAGE_DIGITIZER_DEVICE_MODE
 #define HID_USAGE_DIGITIZER_DEVICE_MODE            0x0E
+#endif
 #define HID_USAGE_PEN                          0x02
 #define HID_USAGE_TOUCH_SCREEN                 0x04
 #define HID_USAGE_TOUCH_PAD                    0x05
