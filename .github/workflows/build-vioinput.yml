@@ -26,13 +26,27 @@ jobs:
       - name: Build vioinput
         run: msbuild vioinput/vioinput.sln -p:Configuration="Win11 Release" -p:Platform=x64 -m -v:m
 
+      - name: Sign drivers with VirtIOTestCert
+        shell: pwsh
+        run: |
+          $kit = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          $bin = Join-Path $kit.FullName "x64"
+          $env:Path += ";$bin"
+          New-Item -ItemType Directory -Force -Path signed | Out-Null
+          Copy-Item vioinput/sys/x64/Win11Release/vioinput.sys signed/
+          Copy-Item vioinput/hidpassthrough/x64/Win11Release/viohidkmdf.sys signed/
+          Copy-Item vioinput/package/x64/Win11Release/vioinput.inf signed/
+          Write-Host "Generating catalog..."
+          inf2cat /driver:signed /os:10_X64 /verbose 2>&1 | Out-String | Write-Host
+          Write-Host "Signing..."
+          signtool sign /fd SHA256 /f build/VirtIOTestCert.pfx signed/vioinput.sys 2>&1 | Out-String | Write-Host
+          signtool sign /fd SHA256 /f build/VirtIOTestCert.pfx signed/viohidkmdf.sys 2>&1 | Out-String | Write-Host
+          signtool sign /fd SHA256 /f build/VirtIOTestCert.pfx signed/vioinput.cat 2>&1 | Out-String | Write-Host
+          Get-ChildItem signed | Select-Object Name,Length | Format-Table -AutoSize
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: vioinput-mt-x64
-          path: |
-            vioinput/**/x64/Win11Release/*.sys
-            vioinput/**/x64/Win11Release/*.inf
-            vioinput/**/x64/Win11Release/*.cat
-            vioinput/**/x64/Win11Release/*.dll
+          path: signed/
           if-no-files-found: error
