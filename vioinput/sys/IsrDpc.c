@@ -32,6 +32,7 @@
 
 #if defined(EVENT_TRACING)
 #include "IsrDpc.tmh"
+#include "vioinput_log.h"
 #endif
 
 static VOID VIOInputEnableInterrupt(PINPUT_DEVICE pContext)
@@ -141,6 +142,14 @@ VOID VIOInputQueuesInterruptDpc(IN WDFINTERRUPT Interrupt, IN WDFOBJECT Associat
     WdfSpinLockAcquire(pContext->EventQLock);
     while ((pEvent = virtqueue_get_buf(pContext->EventQ, &len)) != NULL)
     {
+        {
+            static ULONG s_evtN = 0;
+            if (s_evtN++ < 300 || (s_evtN % 2000) == 0)
+            {
+                VIOINPUT_LOG("VIOINPUT-DBG: virtio evt type=%u code=%u value=%d (n=%lu)\n",
+                             pEvent->type, pEvent->code, pEvent->value, s_evtN);
+            }
+        }
         // translate event to a HID report and complete a pending HID request
         ProcessInputEvent(pContext, pEvent);
 
