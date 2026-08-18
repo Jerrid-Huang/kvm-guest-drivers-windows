@@ -33,7 +33,9 @@
 
 // If defined, will expose absolute axes as a tablet device only if they
 // don't come with mouse buttons.
-#define EXPOSE_ABS_AXES_WITH_BUTTONS_AS_MOUSE
+// DISABLED for touchpad passthrough: with buttons+ABS_MT the tablet probe
+// needs ABS_X/ABS_Y which the mouse probe would consume -> MT touch pad lost.
+// #define EXPOSE_ABS_AXES_WITH_BUTTONS_AS_MOUSE
 
 EVT_WDF_DRIVER_DEVICE_ADD VIOInputEvtDeviceAdd;
 

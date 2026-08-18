@@ -1,0 +1,38 @@
+name: build-vioinput-mt
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install WDK
+        shell: pwsh
+        run: |
+          $url = "https://go.microsoft.com/fwlink/?LinkId=2371554"
+          Write-Host "Downloading WDK from $url"
+          Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\wdk.exe"
+          Write-Host "Installing WDK..."
+          Start-Process -Wait -FilePath "$env:TEMP\wdk.exe" -ArgumentList "/install", "/quiet", "/norestart", "/accepteula"
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build vioinput
+        run: msbuild vioinput/vioinput.sln -p:Configuration=Release -p:Platform=x64 -m -v:m
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vioinput-mt-x64
+          path: |
+            vioinput/**/x64/Release/*.sys
+            vioinput/**/x64/Release/*.inf
+            vioinput/**/x64/Release/*.cat
+            vioinput/**/x64/Release/*.dll
+          if-no-files-found: error
