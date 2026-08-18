@@ -29,9 +29,9 @@ jobs:
       - name: Sign drivers with VirtIOTestCert
         shell: pwsh
         run: |
-          $kit = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Directory | Sort-Object Name -Descending | Select-Object -First 1
-          $bin = Join-Path $kit.FullName "x64"
-          $env:Path += ";$bin"
+          $tools = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Include inf2cat.exe,signtool.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+          foreach ($t in $tools) { $env:Path = (Split-Path $t) + ";" + $env:Path }
+          Write-Host "PATH tools: $tools"
           New-Item -ItemType Directory -Force -Path signed | Out-Null
           Copy-Item vioinput/sys/x64/Win11Release/vioinput.sys signed/
           Copy-Item vioinput/hidpassthrough/x64/Win11Release/viohidkmdf.sys signed/
