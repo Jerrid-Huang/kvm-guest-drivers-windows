@@ -33,7 +33,6 @@
 #include "precomp.h"
 #include "vioinput.h"
 #include "Hid.h"
-#include "vioinput_log.h"
 
 #if defined(EVENT_TRACING)
 #include "Hid.tmh"
@@ -222,15 +221,6 @@ static VOID CompleteHIDQueueRequest(PINPUT_DEVICE pContext, PINPUT_CLASS_COMMON 
         if (NT_SUCCESS(status))
         {
             pClass->bDirty = FALSE;
-        }
-        VIOINPUT_LOG("VIOINPUT-DBG: report sent class=%u size=%lu status=0x%x dirty=%d\n", pClass->uReportID, (ULONG)pClass->cbHidReportSize, status, pClass->bDirty);
-    }
-    else
-    {
-        static ULONG s_dbgNoReq = 0;
-        if (s_dbgNoReq++ < 20)
-        {
-            VIOINPUT_LOG("VIOINPUT-DBG: no queued HID request (status 0x%x, class=%u dirty=%d)\n", status, pClass->uReportID, pClass->bDirty);
         }
     }
 }
