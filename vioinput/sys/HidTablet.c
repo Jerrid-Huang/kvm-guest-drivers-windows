@@ -340,13 +340,13 @@ static NTSTATUS HIDTabletEventToReport(PINPUT_CLASS_COMMON pClass, PVIRTIO_INPUT
                         if ((LONG)pEvent->value < 0)
                         {
                             pTabletDesc->pTrackingID[pTabletDesc->uLastMTSlot].bPendingDel = TRUE;
-                            pReportSlot->uFlags &= ~0x01;
+                            pReportSlot->uFlags &= ~0x03;
                         }
                         else
                         {
                             pTabletDesc->pTrackingID[pTabletDesc->uLastMTSlot].uID = (LONG)pEvent->value;
                             pReportSlot->uContactID = (USHORT)pEvent->value;
-                            pReportSlot->uFlags |= 0x01;
+                            pReportSlot->uFlags |= 0x03;   /* tip switch + in range */
                         }
                         break;
                     default:
@@ -758,14 +758,13 @@ HIDTabletProbe(PINPUT_DEVICE pContext,
         HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_TIP_SWITCH);
         HIDAppend2(pHidDesc, HID_TAG_INPUT, HID_DATA_FLAG_VARIABLE);
 
-        // Only simluate finger down/up for MT
+        // in range flag, one bit (required by PTP for both MT and ST)
+        HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_IN_RANGE);
+        HIDAppend2(pHidDesc, HID_TAG_INPUT, HID_DATA_FLAG_VARIABLE);
+
+        // barrel switch, one bit (stylus only)
         if (!pTabletDesc->bMT)
         {
-            // in range flag, one bit
-            HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_IN_RANGE);
-            HIDAppend2(pHidDesc, HID_TAG_INPUT, HID_DATA_FLAG_VARIABLE);
-
-            // barrel switch, one bit
             HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_BARREL_SWITCH);
             HIDAppend2(pHidDesc, HID_TAG_INPUT, HID_DATA_FLAG_VARIABLE);
         }
