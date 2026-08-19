@@ -345,7 +345,7 @@ static NTSTATUS HIDTabletEventToReport(PINPUT_CLASS_COMMON pClass, PVIRTIO_INPUT
                         else
                         {
                             pTabletDesc->pTrackingID[pTabletDesc->uLastMTSlot].uID = (LONG)pEvent->value;
-                            pReportSlot->uContactID = (USHORT)pEvent->value;
+                            pReportSlot->uContactID = (UCHAR)pEvent->value;
                             pReportSlot->uFlags |= 0x03;   /* tip switch + in range */
                         }
                         break;
@@ -958,13 +958,13 @@ HIDTabletProbe(PINPUT_DEVICE pContext,
             // Assign a different contact ID for anonymous MT
             for (uNumContacts = 0; uNumContacts < pTabletDesc->uMaxContacts; uNumContacts++)
             {
-                ((PINPUT_CLASS_TABLET_SLOT)&pReport[HID_REPORT_DATA_OFFSET])[uNumContacts].uContactID = (USHORT)(uNumContacts +
+                ((PINPUT_CLASS_TABLET_SLOT)&pReport[HID_REPORT_DATA_OFFSET])[uNumContacts].uContactID = (UCHAR)(uNumContacts +
                                                                                                                  1);
             }
         }
         else
         {
-            ((PINPUT_CLASS_TABLET_SLOT)&pReport[HID_REPORT_DATA_OFFSET])[0].uContactID = 1;
+            ((PINPUT_CLASS_TABLET_SLOT)&pReport[HID_REPORT_DATA_OFFSET])[0].uContactID = (UCHAR)1;
             pReport[HID_REPORT_DATA_OFFSET + sizeof(INPUT_CLASS_TABLET_SLOT) * pTabletDesc->uMaxContacts] = 1;
         }
         for (uNumContacts = 0; uNumContacts < pTabletDesc->uMaxContacts; uNumContacts++)
