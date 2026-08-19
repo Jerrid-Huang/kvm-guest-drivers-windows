@@ -732,7 +732,7 @@ HIDTabletProbe(PINPUT_DEVICE pContext,
     pTabletDesc->Common.uReportID = (UCHAR)(pContext->uNumOfClasses + 1);
 
     HIDAppend2(pHidDesc, HID_TAG_USAGE_PAGE, HID_USAGE_PAGE_DIGITIZER);
-    HIDAppend2(pHidDesc, HID_TAG_USAGE, pTabletDesc->bMT ? HID_USAGE_TOUCH_PAD : HID_USAGE_DIGITIZER);
+    HIDAppend2(pHidDesc, HID_TAG_USAGE, pTabletDesc->bMT ? HID_USAGE_TOUCH_SCREEN : HID_USAGE_DIGITIZER);
 
     HIDAppend2(pHidDesc, HID_TAG_COLLECTION, HID_COLLECTION_APPLICATION);
     HIDAppend2(pHidDesc, HID_TAG_REPORT_ID, pTabletDesc->Common.uReportID);
