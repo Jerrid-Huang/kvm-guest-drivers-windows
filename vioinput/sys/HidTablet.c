@@ -46,7 +46,7 @@
 typedef struct _tagInputClassTabletSlot
 {
     UCHAR uFlags;
-    USHORT uContactID;
+    UCHAR uContactID;      /* PTP requires 8-bit contact ID */
     USHORT uAxisX;
     USHORT uAxisY;
     USHORT uTouchWidth;
@@ -769,13 +769,13 @@ HIDTabletProbe(PINPUT_DEVICE pContext,
             HIDAppend2(pHidDesc, HID_TAG_INPUT, HID_DATA_FLAG_VARIABLE);
         }
 
-        // padding
+        // padding: MT = tip+inrange (2 bits) + 6 = 1 byte; ST = tip+inrange+barrel (3) + 5 = 1 byte
         HIDAppend2(pHidDesc, HID_TAG_LOGICAL_MAXIMUM, 0x00);
-        HIDAppend2(pHidDesc, HID_TAG_REPORT_COUNT, pTabletDesc->bMT ? 0x07 : 0x05);
+        HIDAppend2(pHidDesc, HID_TAG_REPORT_COUNT, pTabletDesc->bMT ? 0x06 : 0x05);
         HIDAppend2(pHidDesc, HID_TAG_INPUT, HID_DATA_FLAG_VARIABLE | HID_DATA_FLAG_CONSTANT);
 
-        // Contact Identifier, 2 bytes
-        HIDAppend2(pHidDesc, HID_TAG_REPORT_SIZE, 0x10);
+        // Contact Identifier, 1 byte (PTP requires 8-bit)
+        HIDAppend2(pHidDesc, HID_TAG_REPORT_SIZE, 0x08);
         HIDAppend2(pHidDesc, HID_TAG_REPORT_COUNT, 0x01);
         HIDAppend2(pHidDesc, HID_TAG_USAGE, HID_USAGE_DIGITIZER_CONTACT_ID);
         HIDAppend2(pHidDesc, HID_TAG_LOGICAL_MAXIMUM, pTabletDesc->uMaxContacts - 1);
