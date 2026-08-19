@@ -86,6 +86,7 @@ typedef struct _tagInputClassCommon
     BOOLEAN bDirty;
 
     NTSTATUS (*GetFeatureFunc)(struct _tagInputClassCommon *pClass, PHID_XFER_PACKET pFeaturePkt);
+    NTSTATUS (*SetFeatureFunc)(struct _tagInputClassCommon *pClass, PHID_XFER_PACKET pFeaturePkt);
     NTSTATUS (*EventToCollectFunc)(struct _tagInputClassCommon *pClass, PVIRTIO_INPUT_EVENT pEvent);
     NTSTATUS (*EventToReportFunc)(struct _tagInputClassCommon *pClass, PVIRTIO_INPUT_EVENT pEvent);
     NTSTATUS(*ReportToEventFunc)

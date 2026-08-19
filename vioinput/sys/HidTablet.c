@@ -154,6 +154,34 @@ static NTSTATUS HIDTabletGetFeature(PINPUT_CLASS_COMMON pClass, PHID_XFER_PACKET
     return status;
 }
 
+static NTSTATUS HIDTabletSetFeature(PINPUT_CLASS_COMMON pClass, PHID_XFER_PACKET pFeaturePkt)
+{
+    UCHAR uReportID = *(PUCHAR)pFeaturePkt->reportBuffer;
+    NTSTATUS status = STATUS_SUCCESS;
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "--> %s\n", __FUNCTION__);
+
+    switch (uReportID)
+    {
+        case REPORTID_FEATURE_TABLET_CONFIG:
+            /* Windows Precision Touchpad driver writes the Configuration
+               feature report to set Device Mode. Accept the write; the
+               GET path returns forced-enabled (2) regardless. */
+            if (pFeaturePkt->reportBufferLen < sizeof(INPUT_CLASS_TABLET_FEATURE_CONFIG))
+            {
+                status = STATUS_BUFFER_TOO_SMALL;
+            }
+            break;
+        default:
+            status = STATUS_INVALID_PARAMETER;
+            break;
+    }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "<-- %s\n", __FUNCTION__);
+
+    return status;
+}
+
 static NTSTATUS HIDTabletEventToCollect(PINPUT_CLASS_COMMON pClass, PVIRTIO_INPUT_EVENT pEvent)
 {
     PINPUT_CLASS_TABLET pTabletDesc = (PINPUT_CLASS_TABLET)pClass;
@@ -697,6 +725,7 @@ HIDTabletProbe(PINPUT_DEVICE pContext,
     }
 
     pTabletDesc->Common.GetFeatureFunc = HIDTabletGetFeature;
+    pTabletDesc->Common.SetFeatureFunc = HIDTabletSetFeature;
     pTabletDesc->Common.EventToCollectFunc = HIDTabletEventToCollect;
     pTabletDesc->Common.EventToReportFunc = HIDTabletEventToReport;
     pTabletDesc->Common.CleanupFunc = HIDTabletCleanup;
